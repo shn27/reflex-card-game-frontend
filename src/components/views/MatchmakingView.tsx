@@ -1,108 +1,94 @@
 'use client'
-
 import { useEffect, useState } from 'react'
 
 interface Props {
   onCancel: () => void
+  waitingMessage?: string
 }
 
-const DOTS = ['·', '··', '···']
-
-export function MatchmakingView({ onCancel }: Props) {
-  const [dotIdx, setDotIdx] = useState(0)
-
+export function MatchmakingView({ onCancel, waitingMessage }: Props) {
+  const [dot, setDot] = useState(0)
   useEffect(() => {
-    const id = setInterval(() => setDotIdx(i => (i + 1) % 3), 500)
+    const id = setInterval(() => setDot(d => (d + 1) % 3), 500)
     return () => clearInterval(id)
   }, [])
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%',
-      padding: '24px 32px',
-    }}>
-      <div>
-        <p style={{ fontSize: 13, color: 'var(--fg-muted)', margin: '0 0 4px' }}>Finding a match</p>
-        <h2 style={{ fontSize: 22, fontWeight: 700, color: 'var(--fg)', margin: 0, fontFamily: 'var(--font-display)' }}>
-          Waiting for opponent
-        </h2>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '32px 28px' }}>
+      <div style={{ textAlign: 'center', marginBottom: 32 }}>
+        <p style={{ fontSize: 10, color: '#c9a84c', letterSpacing: '0.18em', marginBottom: 6 }}>
+          FINDING OPPONENT
+        </p>
+        <div style={{ width: 36, height: 1, background: '#9a7a2e', margin: '0 auto' }} />
       </div>
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 32 }}>
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 32 }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 28 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
             <div style={{
-              width: 56,
-              height: 56,
-              borderRadius: '50%',
-              background: 'var(--avatar-you-bg)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 20,
-              fontWeight: 700,
-              color: 'var(--avatar-you-fg)',
-              letterSpacing: '0.05em',
-            }}>
-              YO
-            </div>
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--fg)' }}>You</span>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--green)' }} />
+              width: 58, height: 58, borderRadius: '50%',
+              background: 'rgba(201,168,76,0.12)', border: '2px solid #9a7a2e',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: 'Georgia, serif', fontSize: 22, fontWeight: 700, color: '#c9a84c',
+            }}>Y</div>
+            <span style={{ fontSize: 12, color: '#fdf6e3', fontWeight: 500 }}>You</span>
+            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#4caf50' }} />
           </div>
 
-          <span style={{ fontSize: 18, color: 'var(--fg-muted)', marginBottom: 22, fontFamily: 'var(--font-display)' }}>
-            vs
-          </span>
+          <span style={{ fontFamily: 'Georgia, serif', fontSize: 20, color: 'rgba(253,246,227,0.35)' }}>VS</span>
 
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
             <div style={{
-              width: 56,
-              height: 56,
-              borderRadius: '50%',
-              background: 'var(--surface)',
-              border: '1.5px dashed var(--border)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-              <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-                <circle cx="11" cy="8" r="4" stroke="var(--fg-muted)" strokeWidth="1.2"/>
-                <path d="M3 20c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="var(--fg-muted)" strokeWidth="1.2" strokeLinecap="round"/>
-              </svg>
-            </div>
-            <span style={{ fontSize: 12, color: 'var(--fg-muted)' }}>Opponent</span>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--border)' }} />
+              width: 58, height: 58, borderRadius: '50%',
+              background: 'rgba(255,255,255,0.03)', border: '2px dashed #9a7a2e',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 24, color: '#9a7a2e',
+            }}>?</div>
+            <span style={{ fontSize: 12, color: 'rgba(253,246,227,0.45)' }}>Waiting...</span>
+            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#9a7a2e' }} />
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 20, color: 'var(--fg-muted)', letterSpacing: 2, fontFamily: 'monospace', minWidth: 28 }}>
-            {DOTS[dotIdx]}
+        {/* animated dots + server message */}
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          {[0, 1, 2].map(i => (
+            <div key={i} style={{
+              width: 6, height: 6, borderRadius: '50%', background: '#c9a84c',
+              opacity: dot === i ? 1 : 0.2, transition: 'opacity 0.3s',
+            }} />
+          ))}
+          <span style={{ fontSize: 12, color: 'rgba(253,246,227,0.45)', marginLeft: 6, letterSpacing: '0.04em' }}>
+            {waitingMessage || 'Searching for a player'}
           </span>
-          <span style={{ fontSize: 13, color: 'var(--fg-muted)' }}>Searching for a player</span>
+        </div>
+
+        <div style={{
+          background: 'rgba(0,0,0,0.22)',
+          border: '1px solid rgba(201,168,76,0.18)',
+          borderRadius: 10, padding: '14px 18px', width: '100%', textAlign: 'center',
+        }}>
+          <p style={{ fontSize: 11, color: 'rgba(253,246,227,0.4)', letterSpacing: '0.08em', marginBottom: 4 }}>
+            HOW TO WIN
+          </p>
+          <p style={{ fontSize: 13, color: 'rgba(253,246,227,0.7)', lineHeight: 1.6 }}>
+            Wait for an Ace — then tap fast.<br />
+            Tap any other card and you lose.
+          </p>
         </div>
       </div>
 
       <button
         onClick={onCancel}
         style={{
-          width: '100%',
-          padding: '14px',
-          background: 'transparent',
-          color: 'var(--fg-muted)',
-          border: '1px solid var(--border)',
-          borderRadius: 12,
-          fontSize: 15,
-          fontWeight: 600,
-          cursor: 'pointer',
-          fontFamily: 'var(--font-display)',
+          width: '100%', padding: '14px', background: 'transparent',
+          color: 'rgba(201,168,76,0.6)', border: '1.5px solid rgba(154,122,46,0.4)',
+          borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+          letterSpacing: '0.06em', marginTop: 8,
         }}
-        onMouseOver={e => (e.currentTarget.style.background = 'var(--surface)')}
-        onMouseOut={e => (e.currentTarget.style.background = 'transparent')}
+        onMouseOver={e => (e.currentTarget.style.borderColor = '#9a7a2e')}
+        onMouseOut={e => (e.currentTarget.style.borderColor = 'rgba(154,122,46,0.4)')}
       >
-        Cancel
+        CANCEL
       </button>
     </div>
   )

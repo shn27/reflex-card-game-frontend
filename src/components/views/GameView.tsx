@@ -1,156 +1,92 @@
 'use client'
-
 import { useEffect, useState } from 'react'
-import { PlayingCard } from '@/src/components/ui/PlayingCard'
-import { PlayerAvatar } from '@/src/components/ui/PlayerAvatar'
-import type { Card, Player, RoundResult } from '@/src/types/game'
+import { PlayingCard, CardBack } from '@/components/ui/PlayingCard'
+import type { Card } from '@/types/game'
 
 interface Props {
   currentCard: Card | null
-  players: Player[]
-  myId: string
-  scores: Record<string, number>
-  roundResult: RoundResult | null
-  cardIndex: number
-  totalRounds: number
+  cardIndex: number            // 1-based, out of 52 (from card_index)
   onTap: () => void
 }
 
-export function GameView({
-  currentCard,
-  players,
-  myId,
-  scores,
-  roundResult,
-  cardIndex,
-  totalRounds,
-  onTap,
-}: Props) {
-  const [flash, setFlash] = useState<'win' | 'loss' | 'penalty' | null>(null)
+export function GameView({ currentCard, cardIndex, onTap }: Props) {
   const isAce = currentCard?.rank === 'A'
-  const me = players.find(p => p.id === myId)
-  const opponent = players.find(p => p.id !== myId)
+  const [flash, setFlash] = useState(false)
 
   useEffect(() => {
-    if (!roundResult) return
-    setFlash(roundResult.outcome)
-    const id = setTimeout(() => setFlash(null), 900)
+    if (!currentCard) return
+    setFlash(true)
+    const id = setTimeout(() => setFlash(false), 160)
     return () => clearTimeout(id)
-  }, [roundResult])
-
-  const flashColors: Record<string, string> = {
-    win: 'rgba(39, 174, 96, 0.12)',
-    loss: 'rgba(192, 57, 43, 0.10)',
-    penalty: 'rgba(230, 126, 34, 0.12)',
-  }
+  }, [currentCard])
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%',
-      padding: '20px 24px',
-      background: flash ? flashColors[flash] : 'transparent',
-      transition: 'background 0.2s',
-    }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        {me && <PlayerAvatar name={me.name} score={scores[me.id] ?? 0} isMe />}
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '20px 24px 28px' }}>
 
+      {/* card counter — always 52 total */}
+      <div style={{ textAlign: 'center', marginBottom: 20 }}>
         <div style={{
-          background: 'var(--surface)',
-          borderRadius: 8,
-          padding: '4px 12px',
-          fontSize: 12,
-          color: 'var(--fg-muted)',
+          display: 'inline-flex', alignItems: 'baseline', gap: 4,
+          background: 'rgba(0,0,0,0.22)',
+          border: '1px solid rgba(201,168,76,0.2)',
+          borderRadius: 8, padding: '5px 16px',
         }}>
-          <span style={{ color: 'var(--fg)', fontWeight: 600 }}>{cardIndex}</span>
-          <span> / {totalRounds}</span>
+          <span style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 700, color: '#c9a84c' }}>
+            {cardIndex}
+          </span>
+          <span style={{ fontSize: 13, color: 'rgba(253,246,227,0.4)' }}> / 52</span>
         </div>
-
-        {opponent && <PlayerAvatar name={opponent.name} score={scores[opponent.id] ?? 0} />}
       </div>
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 20 }}>
-        {currentCard ? (
-          <PlayingCard card={currentCard} highlight={isAce} />
-        ) : (
-          <div style={{
-            width: 180,
-            height: 252,
-            background: 'var(--surface)',
-            border: '1px solid var(--border)',
-            borderRadius: 16,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <span style={{ fontSize: 13, color: 'var(--fg-muted)' }}>Get ready...</span>
-          </div>
-        )}
+      {/* card */}
+      <div style={{
+        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        opacity: flash ? 0.65 : 1, transition: 'opacity 0.1s',
+      }}>
+        {currentCard
+          ? <PlayingCard card={currentCard} glowing={isAce} size="large" />
+          : <CardBack size="large" />
+        }
+      </div>
 
-        {isAce && !roundResult && (
-          <div style={{
-            background: 'var(--danger-bg)',
-            color: 'var(--danger-fg)',
-            borderRadius: 8,
-            padding: '8px 20px',
-            fontSize: 14,
-            fontWeight: 700,
-            letterSpacing: '0.05em',
-            fontFamily: 'var(--font-display)',
-            animation: 'pulse 0.4s ease-out',
-          }}>
+      {/* ace alert — visible only when ace */}
+      <div style={{
+        height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        margin: '16px 0 12px',
+        opacity: isAce ? 1 : 0,
+        transition: 'opacity 0.15s',
+      }}>
+        <div style={{
+          background: 'rgba(201,168,76,0.12)',
+          border: '1px solid rgba(201,168,76,0.4)',
+          borderRadius: 8, padding: '8px 20px',
+        }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#c9a84c', letterSpacing: '0.1em' }}>
             ACE! TAP NOW
-          </div>
-        )}
-
-        {roundResult && (
-          <div style={{
-            fontSize: 14,
-            fontWeight: 600,
-            color: roundResult.outcome === 'win'
-              ? 'var(--green)'
-              : roundResult.outcome === 'penalty'
-              ? 'var(--orange)'
-              : 'var(--red)',
-            letterSpacing: '0.04em',
-            fontFamily: 'var(--font-display)',
-          }}>
-            {roundResult.outcome === 'win' && '✓ You got it!'}
-            {roundResult.outcome === 'loss' && 'Too slow'}
-            {roundResult.outcome === 'penalty' && '✗ Early tap — penalty!'}
-          </div>
-        )}
+          </span>
+        </div>
       </div>
 
+      {/* tap button — gold on ace, dimmed otherwise */}
       <button
         onPointerDown={onTap}
         style={{
-          width: '100%',
-          padding: '22px',
-          background: isAce ? 'var(--accent)' : 'var(--surface)',
-          color: isAce ? '#fff' : 'var(--fg-muted)',
-          border: isAce ? 'none' : '1px solid var(--border)',
-          borderRadius: 14,
-          fontSize: 20,
-          fontWeight: 800,
-          cursor: 'pointer',
-          letterSpacing: '0.06em',
-          fontFamily: 'var(--font-display)',
+          width: '100%', padding: '22px',
+          background: isAce ? '#c9a84c' : 'rgba(255,255,255,0.05)',
+          color: isAce ? '#1a1a1a' : 'rgba(253,246,227,0.2)',
+          border: isAce ? 'none' : '1.5px solid rgba(255,255,255,0.07)',
+          borderRadius: 14, fontSize: 20, fontWeight: 700,
+          cursor: isAce ? 'pointer' : 'default',
+          letterSpacing: '0.12em', fontFamily: 'Georgia, serif',
           transition: 'background 0.15s, color 0.15s',
           WebkitTapHighlightColor: 'transparent',
           userSelect: 'none',
         }}
+        onMouseOver={e => { if (isAce) e.currentTarget.style.background = '#e8c96a' }}
+        onMouseOut={e => { if (isAce) e.currentTarget.style.background = '#c9a84c' }}
       >
         TAP
       </button>
-
-      <style>{`
-        @keyframes pulse {
-          0% { transform: scale(0.92); opacity: 0.6; }
-          100% { transform: scale(1); opacity: 1; }
-        }
-      `}</style>
     </div>
   )
 }

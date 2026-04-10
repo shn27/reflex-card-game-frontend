@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Reflex',
-  description: 'React fast. Hit the ace.',
+  title: 'Reflex — Card Duel',
+  description: 'React fast. Hit the Ace.',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

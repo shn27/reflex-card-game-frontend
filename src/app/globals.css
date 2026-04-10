@@ -1,45 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap');
-
-:root {
-  --font-display: 'Syne', sans-serif;
-  --font-body: 'DM Sans', sans-serif;
-
-  --bg: #0e0e10;
-  --panel: #131316;
-  --surface: #1c1c21;
-  --border: rgba(255,255,255,0.08);
-  --border-disabled: rgba(255,255,255,0.05);
-
-  --fg: #f0f0f2;
-  --fg-muted: #7a7a85;
-  --fg-disabled: #3a3a42;
-
-  --accent: #5b4cf5;
-  --accent-subtle: rgba(91,76,245,0.15);
-
-  --card-bg: #1e1e24;
-  --card-border: rgba(255,255,255,0.1);
-  --card-back: #1a1a22;
-  --card-back-pattern: rgba(255,255,255,0.04);
-
-  --green: #3ecf8e;
-  --green-bg: rgba(62,207,142,0.1);
-  --red: #e05c5c;
-  --red-bg: rgba(224,92,92,0.1);
-  --orange: #f59e0b;
-  --orange-bg: rgba(245,158,11,0.1);
-
-  --danger-bg: rgba(224,92,92,0.12);
-  --danger-fg: #e05c5c;
-
-  --avatar-you-bg: rgba(91,76,245,0.2);
-  --avatar-you-fg: #a89ef7;
-  --avatar-opp-bg: rgba(245,158,11,0.15);
-  --avatar-opp-fg: #f5c842;
-
-  --badge-bg: rgba(91,76,245,0.18);
-  --badge-fg: #a89ef7;
-}
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&display=swap');
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -49,12 +8,10 @@
 
 html, body {
   height: 100%;
-  background: var(--bg);
-  color: var(--fg);
-  font-family: var(--font-body);
+  background: #0e2018;
+  color: #fdf6e3;
+  font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-button {
-  font-family: var(--font-body);
-}
+button { font-family: inherit; }

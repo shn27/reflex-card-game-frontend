@@ -29,6 +29,7 @@ cd reflex-card-game-frontend
 
 ```bash
 npm install
+npm run build
 npm run dev
 ```
 

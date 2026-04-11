@@ -12,7 +12,7 @@ Two-player reflex card game. Built with Next.js 14.
 Copy the example and edit:
 
 ```bash
-cp .env.local.example .env.local
+cp env.example .env.local
 ```
 
 | Variable | Description | Default |
@@ -33,8 +33,6 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
-
-To connect a real backend set `NEXT_PUBLIC_MOCK_MODE=false` and point `NEXT_PUBLIC_WS_URL` at your Go server.
 
 ## Run with Docker
 

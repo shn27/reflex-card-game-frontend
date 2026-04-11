@@ -85,6 +85,7 @@ src/
 | Type | Key fields | Meaning |
 |---|---|---|
 | `waiting` | `message` | In queue, waiting for opponent |
+| `rate_limited` | `message` | Websocket closed for too many request. Have to try again |
 | `game_start` | `player_id` | Match found, game begins |
 | `card_reveal` | `card`, `card_index` | Next card to display |
 | `game_over` | `result`, `reason` | Game ended — win / lose / draw |

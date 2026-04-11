@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useGameSocket }   from '@/hooks/useGameSocket'
-import { useMockSocket }   from '@/hooks/useMockSocket'
+//import { useMockSocket }   from '@/hooks/useMockSocket'
 import { WelcomeView }     from '@/components/views/WelcomeView'
 import { MatchmakingView } from '@/components/views/MatchmakingView'
 import { GameView }        from '@/components/views/GameView'
@@ -13,8 +13,7 @@ const IS_MOCK = process.env.NEXT_PUBLIC_MOCK_MODE === 'true'
 export function GameShell() {
   const [view, setView] = useState<ViewName>('welcome')
   const real = useGameSocket()
-  const mock = useMockSocket()
-  const { state, connect, disconnect, sendClick } = IS_MOCK ? mock : real
+  const { state, connect, disconnect, sendClick } =  real
 
   // waiting → game once server sends game_start (player_id assigned)
   useEffect(() => {
@@ -28,6 +27,9 @@ export function GameShell() {
 
   const handlePlay      = () => { setView('matchmaking'); connect() }
   const handleCancel    = () => { disconnect(); setView('welcome') }
+  // Stay on the matchmaking view and reconnect — the error state inside the
+  // hook resets on connect(), so MatchmakingView switches back to waiting UI.
+  const handleRetry     = () => { connect() }
   const handlePlayAgain = () => { setView('matchmaking'); connect() }
   const handleQuit      = () => { disconnect(); setView('welcome') }
 
@@ -85,7 +87,9 @@ export function GameShell() {
           {view === 'matchmaking' && (
             <MatchmakingView
               onCancel={handleCancel}
+              onRetry={handleRetry}
               waitingMessage={state.waitingMessage}
+              error={state.error}
             />
           )}
           {view === 'game' && (

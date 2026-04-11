@@ -8,7 +8,6 @@ export interface Card {
 
 export type ViewName = 'welcome' | 'matchmaking' | 'game' | 'result'
 
-// Result derived from game_over payload
 export type ResultKind =
   | { type: 'win';  reason: string }
   | { type: 'lose'; reason: string }
@@ -16,9 +15,10 @@ export type ResultKind =
 
 // Server → client (OutMessage)
 export type ServerEvent =
-  | { type: 'waiting';     message: string }
-  | { type: 'game_start';  player_id: number }
-  | { type: 'card_reveal'; card: Card; card_index: number }
-  | { type: 'game_over';   result: 'win' | 'lose' | 'draw'; reason: string; winner_id: number }
+  | { type: 'rate_limited'; message: string }   // sent before close 1008
+  | { type: 'waiting';      message: string }
+  | { type: 'game_start';   player_id: number }
+  | { type: 'card_reveal';  card: Card; card_index: number }
+  | { type: 'game_over';    result: 'win' | 'lose' | 'draw'; reason: string; winner_id: number }
 
 // Client → server (InMessage): { type: "click" }

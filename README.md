@@ -18,7 +18,6 @@ cp .env.local.example .env.local
 | Variable | Description | Default |
 |---|---|---|
 | `NEXT_PUBLIC_WS_URL` | WebSocket URL of the Go backend | `ws://localhost:8080/ws` |
-| `NEXT_PUBLIC_MOCK_MODE` | To Skip backend and test frontend, use built-in mock | `true` |
 
 ## Run locally
 

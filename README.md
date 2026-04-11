@@ -9,12 +9,6 @@ Two-player reflex card game. Built with Next.js 14.
 
 ## Environment variables
 
-Copy the example and edit:
-
-```bash
-cp env.example .env.local
-```
-
 | Variable | Description | Default |
 |---|---|---|
 | `NEXT_PUBLIC_WS_URL` | WebSocket URL of the Go backend | `ws://localhost:8080/ws` |
@@ -25,6 +19,12 @@ cp env.example .env.local
 git clone git@github.com:shn27/reflex-card-game-frontend.git
 cd reflex-card-game-frontend
 ```
+Copy the example and edit:
+
+```bash
+cp env.example .env.local
+```
+
 
 ```bash
 npm install

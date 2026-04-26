@@ -22,7 +22,7 @@ export type ResultKind =
 
 export interface RoomPlayer {
   id: number
-  name: string        // "Player 1", "Player 2" etc — or later a real name
+  name: string
   isHost: boolean
 }
 
@@ -36,8 +36,9 @@ export type ServerEvent =
   // friends room events
   | { type: 'room_created';   secret: string; player_id: number }
   | { type: 'room_joined';    secret: string; player_id: number; players: RoomPlayer[] }
-  | { type: 'room_updated';   players: RoomPlayer[] }   // someone joined or left
+  | { type: 'room_updated';   players: RoomPlayer[]; secret: string }
   | { type: 'room_invalid';   message: string }         // bad secret or room not in waiting state
   | { type: 'room_started';   }                         // host clicked start → transition to game
+  | { type: 'room_host_left'; }                         // host left waiting → everyone back to friends
 
-// Client → server: { type: "click" } | { type: "room_start" }
+// Client → server: { type: "click" } | { type: "room_start", secret: string } | { type: "room_leave", secret: string }

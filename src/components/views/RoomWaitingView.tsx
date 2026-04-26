@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { RoomPlayer } from '@/types/game'
 
 interface Props {
@@ -7,11 +7,39 @@ interface Props {
   players: RoomPlayer[]
   isHost: boolean
   myPlayerId: number | null
+  hostLeft?: boolean
   onStart: () => void
   onLeave: () => void
 }
 
-export function RoomWaitingView({ secret, players, isHost, myPlayerId, onStart, onLeave }: Props) {
+
+function HostLeftBanner() {
+  const [seconds, setSeconds] = useState(2)
+
+  useEffect(() => {
+    if (seconds <= 0) return
+    const id = setTimeout(() => setSeconds(s => s - 1), 1000)
+    return () => clearTimeout(id)
+  }, [seconds])
+
+  return (
+    <div style={{
+      background: 'rgba(239,83,80,0.12)',
+      border: '1px solid rgba(239,83,80,0.4)',
+      borderRadius: 10, padding: '14px 16px',
+      marginBottom: 16, textAlign: 'center',
+    }}>
+      <p style={{ fontSize: 14, fontWeight: 700, color: '#ef9a9a', margin: '0 0 4px', letterSpacing: '0.02em' }}>
+        Host has left the room
+      </p>
+      <p style={{ fontSize: 12, color: 'rgba(239,83,80,0.7)', margin: 0 }}>
+        Returning to lobby in {seconds}s...
+      </p>
+    </div>
+  )
+}
+
+export function RoomWaitingView({ secret, players, isHost, myPlayerId, hostLeft, onStart, onLeave }: Props) {
   const [copied, setCopied] = useState(false)
 
   const handleCopy = () => {
@@ -32,6 +60,9 @@ export function RoomWaitingView({ secret, players, isHost, myPlayerId, onStart, 
         </p>
         <div style={{ width: 36, height: 1, background: '#9a7a2e', margin: '0 auto' }} />
       </div>
+
+      {/* host left banner with countdown */}
+      {hostLeft && <HostLeftBanner />}
 
       {/* secret code */}
       <div style={{

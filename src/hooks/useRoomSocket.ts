@@ -23,6 +23,7 @@ export interface RoomState {
   cardIndex: number
   result: ResultKind | null
   opponentDisconnected: boolean
+  hostLeft: boolean           // waiting phase: host disconnected → go back
 }
 
 const initial: RoomState = {
@@ -37,6 +38,7 @@ const initial: RoomState = {
   cardIndex: 0,
   result: null,
   opponentDisconnected: false,
+  hostLeft: false,
 }
 
 export function useRoomSocket() {
@@ -105,6 +107,12 @@ export function useRoomSocket() {
           case 'room_started':
             return { ...prev, status: 'playing' }
 
+          case 'room_host_left':
+            // Host left the waiting room — signal GameShell to send everyone back
+            return { ...prev, hostLeft: true }
+
+
+
           case 'game_start':
             return { ...prev, status: 'playing', myPlayerId: evt.player_id }
 
@@ -146,8 +154,8 @@ export function useRoomSocket() {
   }, [openSocket])
 
   const startGame = useCallback(() => {
-    wsRef.current?.send(JSON.stringify({ type: 'room_start' }))
-  }, [])
+    wsRef.current?.send(JSON.stringify({ type: 'room_start', secret: state.secret }))
+  }, [state.secret])
 
   const sendClick = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
@@ -161,11 +169,23 @@ export function useRoomSocket() {
     setState(initial)
   }, [])
 
+  // Sends an explicit leave message before closing so the server can
+  // cleanly remove the player and notify others, rather than inferring
+  // a leave from a dropped connection.
+  const leaveRoom = useCallback(() => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ type: 'room_leave', secret: state.secret }))
+    }
+    wsRef.current?.close()
+    wsRef.current = null
+    setState(initial)
+  }, [state.secret])
+
   const clearError = useCallback(() => {
     setState(prev => ({ ...prev, error: null, errorMessage: '' }))
   }, [])
 
   useEffect(() => () => { wsRef.current?.close() }, [])
 
-  return { state, createRoom, joinRoom, startGame, sendClick, disconnect, clearError }
+  return { state, createRoom, joinRoom, startGame, sendClick, disconnect, leaveRoom, clearError }
 }

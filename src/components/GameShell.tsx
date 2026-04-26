@@ -1,9 +1,7 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useGameSocket }    from '@/hooks/useGameSocket'
-//import { useMockSocket }    from '@/hooks/useMockSocket'
 import { useRoomSocket }    from '@/hooks/useRoomSocket'
-import { useMockRoomSocket } from '@/hooks/useMockRoomSocket'
 import { WelcomeView }      from '@/components/views/WelcomeView'
 import { MatchmakingView }  from '@/components/views/MatchmakingView'
 import { FriendsView }      from '@/components/views/FriendsView'
@@ -13,8 +11,6 @@ import { GameView }         from '@/components/views/GameView'
 import { ResultView }       from '@/components/views/ResultsView'
 import type { ViewName }    from '@/types/game'
 
-const IS_MOCK = process.env.NEXT_PUBLIC_MOCK_MODE === 'true'
-
 // Which flow is active — anonymous queue or friends room
 type Flow = 'anon' | 'room'
 
@@ -23,8 +19,8 @@ export function GameShell() {
   const [flow, setFlow] = useState<Flow>('anon')
 
   // ── Anonymous queue ────────────────────────────────────────────────────────
-  const anon     = useGameSocket()
-  const room     = IS_MOCK ? useMockRoomSocket() : useRoomSocket()
+  const anon     =  useGameSocket()
+  const room     =  useRoomSocket()
 
   const anonState = anon.state
   const roomState = room.state
@@ -46,6 +42,23 @@ export function GameShell() {
     if (flow === 'room' && roomState.status === 'waiting' && view !== 'room-waiting')
       setView('room-waiting')
   }, [roomState.status])
+
+  // room: host left waiting room → send everyone back to friends chooser
+  // We use a ref so the effect always has the latest disconnect fn, not a stale closure.
+  const roomDisconnectRef = useRef(room.disconnect)
+  useEffect(() => { roomDisconnectRef.current = room.disconnect })
+
+  useEffect(() => {
+    if (flow === 'room' && roomState.hostLeft && view === 'room-waiting') {
+      // Show the "Host disconnected" banner in RoomWaitingView for 2s
+      // before navigating away and closing the socket.
+      const id = setTimeout(() => {
+        roomDisconnectRef.current()
+        setView('friends')
+      }, 2000)
+      return () => clearTimeout(id)
+    }
+  }, [flow, roomState.hostLeft, view])
 
   // room: waiting → game (host clicked start)
   useEffect(() => {
@@ -86,7 +99,7 @@ export function GameShell() {
   const handleStartGame = () => room.startGame()
 
   const handleLeaveRoom = () => {
-    room.disconnect()
+    room.leaveRoom()
     setView('welcome')
   }
 
@@ -139,15 +152,6 @@ export function GameShell() {
           backgroundSize: '8px 8px', pointerEvents: 'none', zIndex: 0,
         }} />
 
-        {IS_MOCK && (
-          <div style={{
-            position: 'absolute', top: 10, right: 12,
-            background: 'rgba(201,168,76,0.15)', color: '#c9a84c',
-            fontSize: 9, fontWeight: 700, letterSpacing: '0.1em',
-            padding: '3px 7px', borderRadius: 4, zIndex: 10,
-          }}>MOCK</div>
-        )}
-
         {activeDiscon && view === 'game' && (
           <div style={{
             position: 'absolute', top: 12, left: '50%',
@@ -198,6 +202,7 @@ export function GameShell() {
               players={roomState.players}
               isHost={roomState.isHost}
               myPlayerId={roomState.myPlayerId}
+              hostLeft={roomState.hostLeft}
               onStart={handleStartGame}
               onLeave={handleLeaveRoom}
             />
